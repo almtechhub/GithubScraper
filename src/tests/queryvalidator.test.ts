@@ -63,35 +63,12 @@ test("validRange", () => {
 });
 
 test("validIn", () => {
-  expect(validRange("23423")).toBe(true);
-  expect(validRange("<23423")).toBe(true);
-  expect(validRange("<=23423")).toBe(true);
-  expect(validRange(">23423")).toBe(true);
-  expect(validRange(">=23423")).toBe(true);
-  expect(validRange("*..1232")).toBe(true);
-  expect(validRange("31232..*")).toBe(true);
-  expect(validRange("5434..1232")).toBe(true);
+  expect(validIn("description")).toBe(true);
+  expect(validIn("name")).toBe(true);
+  expect(validIn("readme")).toBe(true);
 
-  expect(validRange("234s23")).toBe(false);
-  expect(validRange(">2/3423")).toBe(false);
-  expect(validRange(">=2/3423")).toBe(false);
-  expect(validRange("<=2/3423")).toBe(false);
-  expect(validRange("<2/3423")).toBe(false);
-  expect(validRange("<.=23423")).toBe(false);
-  expect(validRange("?>23423")).toBe(false);
-  expect(validRange(">>=23423")).toBe(false);
-  expect(validRange("*..1d232d")).toBe(false);
-  expect(validRange("312#32..*")).toBe(false);
-  expect(validRange("312#32#..*")).toBe(false);
-  expect(validRange("312#32.$.*")).toBe(false);
-  expect(validRange("312#32.$.*$")).toBe(false);
-  expect(validRange("312#32..*23")).toBe(false);
-  expect(validRange("5434...1232")).toBe(false);
-  expect(validRange("5434%..1232")).toBe(false);
-  expect(validRange("5434..$1232")).toBe(false);
-  expect(validRange("5434..1232&")).toBe(false);
-  expect(validRange("*$..1d232d")).toBe(false);
-  expect(validRange("$*..1d232d")).toBe(false);
-  expect(validRange("*..1d232d$")).toBe(false);
-  expect(validRange("*.$.1d232d")).toBe(false);
+  expect(validIn("rer")).toBe(false);
+  expect(validIn("gse")).toBe(false);
+  expect(validIn("@")).toBe(false);
+
 });
