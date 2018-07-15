@@ -8,14 +8,14 @@ const validLicenses = ["afl-3.0", "apache-2.0", "artistic-2.0", "bs1-1.0", "bsd-
 
 // Validates user/org
 const validGitName = function validGitName(name: string) : boolean {
-    const regex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
+    const regex = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,37}$/i;
     return regex.test(name);
 }
 
 // Validates size/forks/stars/topics
 const validRange = function validRange(rng: string) : boolean {
     // Checks for <1232, <=1231, >1231, >=1232, 3423..*, *..3423, 323..545
-    const reg = /^(?:(?:<=\d+|<\d+|>=\d+|>\d+|\*\.\.\d+|\d+\.\.\*)|\d+$)/gm;
+    const reg = /^(?:(?:<=\d+|<\d+|>=\d+|>\d+|\*\.\.\d+$|\d+\.\.\*|\d+\.\.\d+)$|\d+$)/gm;
     return reg.test(rng);
 }
 
@@ -67,6 +67,21 @@ const validKeys = function validKeys(queryObj: QueryObject) : boolean {
     return Object.keys(queryObj).every(e => validKey(e));
 }
 
+export {
+    validGitName,
+    validRange,
+    validIn,
+    validLang,
+    validTopic,
+    validAddl,
+    validLicense,
+    validIs,
+    validBool,
+    validDate,
+    validKey,
+    validKeys
+}
+
 const validators : Validators = {
     user: validGitName,
     org: validGitName,
@@ -91,4 +106,3 @@ const queryValidator = function queryValidator(queryObj: QueryObject) : boolean 
     if(!validKeys(queryObj)) return false;
 
 }
-
