@@ -70,5 +70,10 @@ test("validIn", () => {
   expect(validIn("rer")).toBe(false);
   expect(validIn("gse")).toBe(false);
   expect(validIn("@")).toBe(false);
+});
 
+test("validLang", () => {
+  expect(validLang("c++")).toBe(true);
+  expect(validLang("java")).toBe(true);
+  expect(validLang("python3")).toBe(true);
 });
