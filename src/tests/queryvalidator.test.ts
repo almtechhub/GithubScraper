@@ -15,8 +15,18 @@ import {
   validIs,
   validMirror, 
   validArchived,
-  validAddl
+  validAddl,
+  validKeys,
+  queryValidator
 } from "../QueryValidator"
+
+import { QueryObject } from "../types";
+
+test('validKeys', () => {
+  const validProps = ["user", "org", "in", "size", "forks", "stars", "created", "pushed", "updated",
+  "language", "topic", "topics", "license", "is", "mirror", "archived", "addl"];
+  expect(validKeys(validProps.reduce((a, c) => { a[c] = c; return a; }, {}))).toBe(true);
+});
 
 test('validUserName', () => {
   expect(validUserName("23f23fsdf")).toBe(true);
@@ -354,6 +364,15 @@ test("validCreated", () => {
   expect(validPushed("2012-07-07T21+99:99")).toBe(true);
   expect(validPushed("2012-07-07T21:21+99:99")).toBe(true);
 
+  expect(validPushed("<2012-07-07T21:21+99:99")).toBe(true);
+  expect(validPushed("<=2012-07-07T21:21+99:99")).toBe(true);
+  expect(validPushed(">=2012-07-07T21:21+99:99")).toBe(true);
+  expect(validPushed(">=2012-07-07T21:21+99:99")).toBe(true);
+  expect(validPushed("2012-07-07T21:21+99:99..*")).toBe(true);
+  expect(validPushed("*..2012-07-07T21:21+99:99")).toBe(true);
+  expect(validPushed("2012-07-07T21:21+99:99..2012-07-07T21:21+99:99")).toBe(true);
+
+
   expect(validPushed("2012-")).toBe(false);
   expect(validPushed("2012-0")).toBe(false);
   expect(validPushed("2012-07-")).toBe(false);
@@ -436,4 +455,69 @@ test("validMirror", () => {
 test("validArchived", () => {
   expect(validArchived(true)).toBe(true);
   expect(validArchived(false)).toBe(true);
+});
+
+test("queryValidator Good", () => {
+  const dataObj = {
+    user: "user1",
+    org: "user1",
+    in: "description",
+    size: "12..*",
+    forks: "*..32",
+    stars: "343..42",
+    created: "2018-07-12",
+    pushed: "2018-06-12T21:21:21Z",
+    updated: "2018-05-21T21+99",
+    language: "c++",
+    topic: "words",
+    topics: "<=343",
+    license: "mit",
+    is: "public",
+    mirror: true,
+    archived: false
+  }
+
+  const getRandomInt = function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  for(let i = 0; i < 100; i++) {
+    const keys = Object.keys(dataObj);
+    for(let j = 0; j < 5; j++) keys.sort(e => getRandomInt(-1 ,1));
+    const siz = getRandomInt(1, keys.length - 1);
+    const tmpObj = {};
+    for(let j = 0; j < siz; j++) {
+      const key = keys.pop();
+      tmpObj[key] = dataObj[key];
+    }
+    expect(queryValidator(tmpObj)).toBe(true);
+  }
+
+  // expect(() => queryValidator(dataObj as QueryObject)).toThrow();
+});
+
+test("queryValidator Bad", () => {
+  const dataObj = {
+    user: "-user1",
+    org: "-user1",
+    in: "descrption",
+    size: "12..*.",
+    forks: "*..32.",
+    stars: "343..42.",
+    created: "2018-07+-12",
+    pushed: "2018-06-1+2T21:21:21Z",
+    updated: "2018-05-2+1T21+99",
+    language: 3,
+    topic: 5,
+    topics: "<=343.",
+    license: "mi",
+    is: "publi",
+    mirror: {},
+    archived: {}
+  }
+
+  for(const x in dataObj) {
+    const tmpObj = {[x] : dataObj[x]};
+    expect(() => queryValidator(tmpObj as QueryObject)).toThrow();
+  }
 });

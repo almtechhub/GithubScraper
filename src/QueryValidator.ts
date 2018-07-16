@@ -1,5 +1,4 @@
 import { QueryObject, Validators } from "./types";
-import moment from "moment";
 
 const validProps = ["user", "org", "in", "size", "forks", "stars", "created", "pushed", "updated",
                     "language", "topic", "topics", "license", "is", "mirror", "archived", "addl"];
@@ -16,7 +15,8 @@ const validBool = function validBool(bool: boolean) : boolean {
 }
 
 const validDate = function validDate(isoDate: string) : boolean {
-    const reg = /^\d{4}(?:\-(?:0[1-9]|1[012]))?(?:\-(?:0[1-9]|[12][0-9]|3[01]))?(?:(?:T(?:0[0-9]|1[0-9]|2[0-3]))?(?:(?:\:[0-5]\d)(?:\:[0-5]\dZ?)?)?(?:\+\d{2}(?:\:\d{2})?)?)?$/;
+    const DATEREG = "\\d{4}(?:\\-(?:0[1-9]|1[012]))?(?:\\-(?:0[1-9]|[12][0-9]|3[01]))?(?:(?:T(?:0[0-9]|1[0-9]|2[0-3]))?(?:(?:\\:[0-5]\\d)(?:\\:[0-5]\\dZ?)?)?(?:\\+\\d{2}(?:\\:\\d{2})?)?)?";
+    const reg = RegExp(`^(?:${DATEREG}|<=${DATEREG}|<${DATEREG}|>${DATEREG}|>=${DATEREG}|\\*\\.\\.${DATEREG}|${DATEREG}\\.\\.\\*|${DATEREG}\\.\\.${DATEREG})$`);
     return reg.test(isoDate);
 }
 
@@ -110,26 +110,6 @@ const validKeys = function validKeys(queryObj: QueryObject) : boolean {
     return Object.keys(queryObj).every(e => validKey(e));
 }
 
-export {
-    validUserName,
-    validOrgName,
-    validIn,
-    validStars,
-    validForks,
-    validSize,
-    validCreated,
-    validPushed,
-    validUpdated,
-    validLang,
-    validTopic,
-    validTopics,
-    validLicense,
-    validIs,
-    validMirror, 
-    validArchived,
-    validAddl
-}
-
 const validators : Validators = {
     user: validUserName,
     org: validOrgName,
@@ -150,7 +130,54 @@ const validators : Validators = {
     addl: validAddl
 }
 
+const valids = {
+    user:    "38 character alphanumeric strings that do not begin with dashes, \n\tie: git-name but not -git-name",
+    org:     "38 character alphanumeric strings that do not begin with dashes, \n\tie: git-name but not -git-name",
+    in:      "One of: description, name, readme",
+    size:    "Formats: #, <#, <=#, >#, >=#, #..*, *..#, #..#, \n\t github docs: https://help.github.com/articles/understanding-the-search-syntax/#query-for-values-greater-or-less-than-another-value",
+    forks:   "Formats: #, <#, <=#, >#, >=#, #..*, *..#, #..#, \n\t github docs: https://help.github.com/articles/understanding-the-search-syntax/#query-for-values-greater-or-less-than-another-value",
+    stars:   "Formats: #, <#, <=#, >#, >=#, #..*, *..#, #..#, \n\t github docs: https://help.github.com/articles/understanding-the-search-syntax/#query-for-values-greater-or-less-than-another-value",
+    created: "github docs: https://help.github.com/articles/understanding-the-search-syntax/#query-for-dates",
+    pushed:  "github docs: https://help.github.com/articles/understanding-the-search-syntax/#query-for-dates",
+    updated: "github docs: https://help.github.com/articles/understanding-the-search-syntax/#query-for-dates",
+    language: "Must be a valid string",
+    topic: "Must be a valid string",
+    topics: "Formats: #, <#, <=#, >#, >=#, #..*, *..#, #..#, \n\t github docs: https://help.github.com/articles/understanding-the-search-syntax/#query-for-values-greater-or-less-than-another-value",
+    license: `License must be one of: ${validLicenses.reduce((a, c) => a += `\t\t\t\t\t\n${c}`, "")}`,
+    is: "One of: public, private",
+    mirror: "One of: true, false", 
+    archived: "One of: true, false",
+    addl: "Must be a valid string"
+}
+
 const queryValidator = function queryValidator(queryObj: QueryObject) : boolean {
     if(!validKeys(queryObj)) return false;
+    for(const x in queryObj) {
+        if(!validators[x](queryObj[x])) {
+            throw new Error(`Invalid query prop, Key: ${x} Value: ${queryObj[x]}. \n\t ${valids[x]}`);
+        }
+    }
+    return true;
+}
 
+export {
+    validUserName,
+    validOrgName,
+    validIn,
+    validStars,
+    validForks,
+    validSize,
+    validCreated,
+    validPushed,
+    validUpdated,
+    validLang,
+    validTopic,
+    validTopics,
+    validLicense,
+    validIs,
+    validMirror, 
+    validArchived,
+    validAddl,
+    validKeys,
+    queryValidator
 }
