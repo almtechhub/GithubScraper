@@ -100,12 +100,10 @@ const validIs = function validIs(is: string) : boolean {
     return (is === "public") || (is === "private");
 }
 
-// Checks if key is valid
 const validKey = function validKey(key: string) : boolean {
     return validProps.includes(key);
 }
 
-// Checks if all keys are valid
 const validKeys = function validKeys(queryObj: QueryObject) : boolean {
     return Object.keys(queryObj).every(e => validKey(e));
 }
