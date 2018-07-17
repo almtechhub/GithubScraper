@@ -10,8 +10,9 @@ const validString = function validString(str: string) : boolean {
     return typeof str === "string";
 }
 
-const validBool = function validBool(bool: boolean) : boolean {
-    return (bool === true) || (bool === false);
+const validBool = function validBool(bool: boolean | string) : boolean {
+    return (bool === true) || (bool === false)
+        || (bool === "true") || (bool === "false");
 }
 
 const validDate = function validDate(isoDate: string) : boolean {
@@ -94,11 +95,11 @@ const validUpdated = function validUpdated(updated: string) : boolean {
     return validDate(updated);
 }
 
-const validMirror = function validMirror(mirr: boolean) : boolean {
+const validMirror = function validMirror(mirr: boolean | string) : boolean {
     return validBool(mirr);
 }
 
-const validArchived = function validArchived(arch: boolean) : boolean {
+const validArchived = function validArchived(arch: boolean | string) : boolean {
     return validBool(arch);
 }
 
@@ -177,6 +178,25 @@ const queryObjValidator = function queryObjValidator(queryObj: QueryObject, thro
 }
 
 const queryValidator = function queryValidator(q: string, throwOnErr: boolean = true) : boolean {
+    const qObj = queryStringToObj(q);
+    return queryObjValidator(qObj as QueryObject);
+}
+
+const queryObjToString = function queryObjToString(qObj: QueryObject, throwOnErr: boolean = true) : string {
+    if(!queryObjValidator(qObj)) return "INVALID OBJECT";
+    let str = "";
+    for(const x in qObj) {
+        if(x === "addl") {
+            str = `${qObj[x]}${str ? " " + str : str}`;
+            continue;
+        } else {
+            str = `${str ? str + " " : str}${x}:${qObj[x]}`;
+        }
+    }
+    return str;
+}
+
+const queryStringToObj = function queryStringToObj(q: string) : QueryObject {
     const split = q.split(" ");
     const qObj = {};
     for(let i = 0; i < split.length; i++) {
@@ -190,8 +210,7 @@ const queryValidator = function queryValidator(q: string, throwOnErr: boolean = 
             qObj["addl"] = qObj["addl"].trim();
         }
     }
-    console.log(qObj);
-    return queryObjValidator(qObj as QueryObject);
+    return qObj;
 }
 
 export {
@@ -215,5 +234,7 @@ export {
     validAddl,
     validKeys,
     queryObjValidator,
-    queryValidator
+    queryValidator,
+    queryObjToString,
+    queryStringToObj
 }

@@ -19,7 +19,9 @@ import {
   validAddl,
   validKeys,
   queryObjValidator,
-  queryValidator
+  queryValidator,
+  queryObjToString,
+  queryStringToObj
 } from "../QueryValidator"
 
 import { QueryObject } from "../types";
@@ -550,7 +552,56 @@ test("queryValidator", () => {
   expect(queryValidator("words")).toBe(true);
   expect(queryValidator("words in:name")).toBe(true);
   expect(queryValidator("words -in:name")).toBe(true);
-  expect(queryValidator("words -in:name")).toBe(true);
   expect(queryValidator("words pushed:2018-06-12T21:21:21Z")).toBe(true);
+  expect(queryValidator("words -in:name user:git-123 org:git-123 hey")).toBe(true);
+  expect(queryValidator("words created:2018-06-12T21:21:21Z..2018-06-12T21:21:21Z")).toBe(true);
+  expect(queryValidator("words created:2018-06-12T21:21:21Z..2018-06-12T21:21:21Z archived:true")).toBe(true);
+  expect(queryValidator("words in:readme mirror:false archived:false")).toBe(true);
+  expect(queryValidator("words in:readme topics:<=343 language:c++ mirror:false archived:false")).toBe(true);
+  expect(queryValidator("words license:mit in:readme topics:<=343 language:c++ mirror:false archived:false")).toBe(true);
+  expect(queryValidator("words license:mit size:12..12 in:readme topics:<=343 language:c++ mirror:false archived:false")).toBe(true);
+  expect(queryValidator("words user:git123 topics:>12312 is:public org:git-123 license:mit size:12..12 in:readme topics:<=343 language:c++ mirror:false archived:false")).toBe(true);
+  expect(queryValidator("word1 forks:132 word2"))
+  expect(queryValidator("words in:readme -mirror:false -archived:false")).toBe(true);
+  expect(queryValidator("words in:description topics:<=343 language:c++ -created:2018-06-12T21:21:21Z..2018-06-12T21:21:21Z -archived:true")).toBe(true);
+  console.log(queryValidator(queryObjToString({
+    user: "user1",
+    org: "user1",
+    in: "description",
+    size: "12..*",
+    forks: "*..32",
+    stars: "343..42",
+    created: "2018-07-12",
+    pushed: "2018-06-12T21:21:21Z",
+    language: "c++",
+    topic: "words",
+    topics: "<=343",
+    license: "mit",
+    is: "public",
+    mirror: true,
+    archived: false,
+    addl: "here is the search"
+  })))
+});
 
+test("query Converters", () => {
+  expect(true).toBe(true);
+  queryObjValidator(queryStringToObj(queryObjToString(queryStringToObj(queryObjToString({
+    user: "user1",
+    org: "user1",
+    in: "description",
+    size: "12..*",
+    forks: "*..32",
+    stars: "343..42",
+    created: "2018-07-12",
+    pushed: "2018-06-12T21:21:21Z",
+    language: "c++",
+    topic: "words",
+    topics: "<=343",
+    license: "mit",
+    is: "public",
+    mirror: true,
+    archived: false,
+    addl: "here is the search"
+  })))))
 });
