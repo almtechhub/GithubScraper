@@ -1,6 +1,6 @@
 import { QueryObject, Validators } from "./types";
 
-const validProps = ["user", "org", "in", "size", "forks", "stars", "created", "pushed", "updated",
+const validProps = ["user", "org", "in", "size", "fork", "forks", "stars", "created", "pushed",
                     "language", "topic", "topics", "license", "is", "mirror", "archived", "addl"];
 
 const validLicenses = ["afl-3.0", "apache-2.0", "artistic-2.0", "bs1-1.0", "bsd-2-clause", "bsd-3-clause", "bsd-3-clause-clear", "cc", "cc0-1.0", "cc-by-4.0", "cc-by-sa-4.0", "wtfpl", "ecl-2.0", "epl-1.0", "eupl-1.1", "agpl-3.0", "gpl", "gpl-2.0", "gpl-3.0", "lgpl", "lgpl-2.1", "lgpl-3.0", "isc", "lppl-1.3c", "ms-pl", "mit", "mpl-2.0", "osl-3.0", "postgresql", "ofl-1.1", "ncsa", "unlicense", "zlib"];
@@ -46,6 +46,12 @@ const validSize = function validSize(size: string) : boolean {
 
 const validForks = function validForks(forks: string) : boolean {
     return validRange(`${forks}`);
+}
+
+const validFork = function validFork(fork: string | boolean) : boolean {
+    return (fork === "true")  || (fork === true) 
+        || (fork === "false") || (fork === false)
+        || (fork === "only");
 }
 
 const validStars = function validStars(stars: string) : boolean {
@@ -101,6 +107,7 @@ const validIs = function validIs(is: string) : boolean {
 }
 
 const validKey = function validKey(key: string) : boolean {
+    if(key[0] === "-") return validProps.includes(key.slice(1, key.length));
     return validProps.includes(key);
 }
 
@@ -148,14 +155,43 @@ const valids = {
     addl: "Must be a valid string"
 }
 
-const queryValidator = function queryValidator(queryObj: QueryObject) : boolean {
-    if(!validKeys(queryObj)) return false;
+const queryObjValidator = function queryObjValidator(queryObj: QueryObject, throwOnErr: boolean = true) : boolean {
     for(const x in queryObj) {
-        if(!validators[x](queryObj[x])) {
-            throw new Error(`Invalid query prop, Key: ${x} Value: ${queryObj[x]}. \n\t ${valids[x]}`);
+        if(!validKey(x)) {
+            if(throwOnErr) {
+                throw new Error(`Invalid query prop, Prop: ${x}.`);
+            } else {
+                return false;
+            }
+        }
+
+        if(!validators[x.replace("-", "")](queryObj[x])) {
+            if(throwOnErr) {
+                throw new Error(`Invalid prop value, Key: ${x} Value: ${queryObj[x]}. \n\t ${valids[x]}`);
+            } else {
+                return false;
+            }
         }
     }
     return true;
+}
+
+const queryValidator = function queryValidator(q: string, throwOnErr: boolean = true) : boolean {
+    const split = q.split(" ");
+    const qObj = {};
+    for(let i = 0; i < split.length; i++) {
+        const ind = split[i].indexOf(":");
+        if(ind >= 0) {
+            let key = split[i].substr(0, ind);
+            let value = split[i].substr(ind + 1, split[i].length);
+            qObj[key] = value;
+        } else {
+            qObj["addl"] = `${split[i]} ${qObj["addl"] || ""}`;
+            qObj["addl"] = qObj["addl"].trim();
+        }
+    }
+    console.log(qObj);
+    return queryObjValidator(qObj as QueryObject);
 }
 
 export {
@@ -164,6 +200,7 @@ export {
     validIn,
     validStars,
     validForks,
+    validFork,
     validSize,
     validCreated,
     validPushed,
@@ -177,5 +214,6 @@ export {
     validArchived,
     validAddl,
     validKeys,
+    queryObjValidator,
     queryValidator
 }

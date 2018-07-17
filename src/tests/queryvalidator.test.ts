@@ -4,6 +4,7 @@ import {
   validIn,
   validStars,
   validForks,
+  validFork,
   validSize,
   validCreated,
   validPushed,
@@ -17,15 +18,28 @@ import {
   validArchived,
   validAddl,
   validKeys,
+  queryObjValidator,
   queryValidator
 } from "../QueryValidator"
 
 import { QueryObject } from "../types";
 
 test('validKeys', () => {
-  const validProps = ["user", "org", "in", "size", "forks", "stars", "created", "pushed", "updated",
+  let validProps = ["user", "org", "in", "size", "forks", "stars", "created", "pushed",
   "language", "topic", "topics", "license", "is", "mirror", "archived", "addl"];
   expect(validKeys(validProps.reduce((a, c) => { a[c] = c; return a; }, {}))).toBe(true);
+
+  validProps = ["-user", "-org", "-in", "-size", "-forks", "-stars", "-created", "-pushed",
+  "-language", "-topic", "-topics", "-license", "-is", "-mirror", "-archived", "-addl"];
+  expect(validKeys(validProps.reduce((a, c) => { a[c] = c; return a; }, {}))).toBe(true);
+
+  validProps = ["uscer", "orsg", "ifn", "sifze", "forkss", "stasrs", "crdeated", "pudshed",
+  "languaage", "topsic", "topicds", "liacense", "ids", "mirraor", "archivded", "adadl"];
+  expect(validKeys(validProps.reduce((a, c) => { a[c] = c; return a; }, {}))).toBe(false);
+
+  validProps = ["-usder", "-orag", "-idn", "-sized", "-forkds", "-stards", "-credated", "-pushded",
+  "-langfuage", "-topaic", "-topsics", "-licensfe", "-ias", "-mirrodr", "-archisved", "-addsl"];
+  expect(validKeys(validProps.reduce((a, c) => { a[c] = c; return a; }, {}))).toBe(false);
 });
 
 test('validUserName', () => {
@@ -124,6 +138,18 @@ test("validForks", () => {
   expect(validForks("$*..1d232d")).toBe(false);
   expect(validForks("*..1d232d$")).toBe(false);
   expect(validForks("*.$.1d232d")).toBe(false);
+});
+
+test("validFork", () => {
+  expect(validFork(true)).toBe(true);
+  expect(validFork("true")).toBe(true);
+  expect(validFork("only")).toBe(true);
+  expect(validFork(false)).toBe(true);
+  expect(validFork("false")).toBe(true);
+  expect(validFork("only")).toBe(true);
+
+  expect(validFork("sds")).toBe(false);
+
 });
 
 test("validSize", () => {
@@ -457,7 +483,7 @@ test("validArchived", () => {
   expect(validArchived(false)).toBe(true);
 });
 
-test("queryValidator Good", () => {
+test("queryObjValidator Good", () => {
   const dataObj = {
     user: "user1",
     org: "user1",
@@ -467,7 +493,6 @@ test("queryValidator Good", () => {
     stars: "343..42",
     created: "2018-07-12",
     pushed: "2018-06-12T21:21:21Z",
-    updated: "2018-05-21T21+99",
     language: "c++",
     topic: "words",
     topics: "<=343",
@@ -490,13 +515,11 @@ test("queryValidator Good", () => {
       const key = keys.pop();
       tmpObj[key] = dataObj[key];
     }
-    expect(queryValidator(tmpObj)).toBe(true);
+    expect(queryObjValidator(tmpObj)).toBe(true);
   }
-
-  // expect(() => queryValidator(dataObj as QueryObject)).toThrow();
 });
 
-test("queryValidator Bad", () => {
+test("queryObjValidator Bad", () => {
   const dataObj = {
     user: "-user1",
     org: "-user1",
@@ -506,7 +529,6 @@ test("queryValidator Bad", () => {
     stars: "343..42.",
     created: "2018-07+-12",
     pushed: "2018-06-1+2T21:21:21Z",
-    updated: "2018-05-2+1T21+99",
     language: 3,
     topic: 5,
     topics: "<=343.",
@@ -518,6 +540,17 @@ test("queryValidator Bad", () => {
 
   for(const x in dataObj) {
     const tmpObj = {[x] : dataObj[x]};
-    expect(() => queryValidator(tmpObj as QueryObject)).toThrow();
+    expect(() => queryObjValidator(tmpObj as QueryObject)).toThrow();
+    expect(queryObjValidator(tmpObj as QueryObject, false)).toBe(false);
   }
+});
+
+test("queryValidator", () => {
+  expect(true).toBe(true);
+  expect(queryValidator("words")).toBe(true);
+  expect(queryValidator("words in:name")).toBe(true);
+  expect(queryValidator("words -in:name")).toBe(true);
+  expect(queryValidator("words -in:name")).toBe(true);
+  expect(queryValidator("words pushed:2018-06-12T21:21:21Z")).toBe(true);
+
 });
