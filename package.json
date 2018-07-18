@@ -28,7 +28,5 @@
     "ts-jest": "^23.0.0",
     "typescript": "^2.9.2"
   },
-  "dependencies": {
-    "moment": "^2.22.2"
-  }
+  "dependencies": {}
 }
