@@ -79,7 +79,7 @@ class GithubScarper extends EventEmitter {
             } else {
                 const now = Date.now();
                 const res = result.data.resources.search.reset * 1e3;
-                const offset = (res - now) + 1e3;
+                const offset = (res - now) + 1e3; // add one second
                 console.log(`No requests remaining, pausing for ${offset / 1000} seconds then beginning scrape`);
                 setTimeout(() => this.start(), offset);
             }
